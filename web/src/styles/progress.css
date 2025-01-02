@@ -1,0 +1,24 @@
+@keyframes rotateCircles {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-rotate {
+  animation: rotateCircles 3s linear infinite;
+  animation-duration: 60s;
+}
+
+.circle-glow::before {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+}

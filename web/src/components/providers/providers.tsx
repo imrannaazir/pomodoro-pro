@@ -1,5 +1,7 @@
 "use client";
+import store from "@/redux/store";
 import { ReactNode, useEffect, useState } from "react";
+import { Provider } from "react-redux";
 import { ThemeProvider } from "./theme-provider";
 
 const Providers = ({ children }: { children: ReactNode }) => {
@@ -20,7 +22,7 @@ const Providers = ({ children }: { children: ReactNode }) => {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <Provider store={store}>{children}</Provider>
     </ThemeProvider>
   );
 };
