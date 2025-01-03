@@ -1,6 +1,7 @@
+import { Footer } from "@/components/layout/footer";
+import Header from "@/components/layout/header";
 import Providers from "@/components/providers/providers";
 import Container from "@/components/ui/container";
-import Header from "@/components/ui/header";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -34,6 +35,7 @@ export default function RootLayout({
         <Providers>
           <Header />
           <Container>{children}</Container>
+          <Footer />
         </Providers>
       </body>
     </html>

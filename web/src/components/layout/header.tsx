@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import AuthAvatar from "./auth-avater";
-import Container from "./container";
+import AuthAvatar from "../ui/auth-avater";
+import Container from "../ui/container";
 
 const Header = () => {
   const navigationLinks = [
