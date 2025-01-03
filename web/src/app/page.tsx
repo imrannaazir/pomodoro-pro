@@ -1,19 +1,12 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import CircularProgress from "@/components/ui/circular-progress";
-import { selectTimer, setIsRunning } from "@/redux/features/timer-slice";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import PomodoroTimer from "@/components/ui/pomodoro-timer";
+import { useEffect } from "react";
 
 export default function Home() {
-  const { isBreak, isRunning, timeLeft } = useAppSelector(selectTimer);
-  const dispatch = useAppDispatch();
-  const totalTime = !isBreak ? 25 * 60 : 5 * 60;
-  const progress = ((totalTime - timeLeft) / totalTime) * 100;
+  useEffect(() => {});
   return (
-    <main>
-      <CircularProgress progress={progress} isPaused={!isRunning}>
-        <Button onClick={() => dispatch(setIsRunning())}>Click</Button>
-      </CircularProgress>
+    <main className="grid lg:grid-cols-2 my-8 ">
+      <PomodoroTimer />
     </main>
   );
 }

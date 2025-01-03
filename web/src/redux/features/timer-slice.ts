@@ -8,8 +8,8 @@ type TInitialState = {
 };
 
 const initialState: TInitialState = {
-  timeLeft: 25 * 60,
-  isBreak: false,
+  timeLeft: Number(process.env.NEXT_PUBLIC_FOCUS_TIME) * 60,
+  isBreak: true,
   isRunning: false,
 };
 
@@ -20,16 +20,22 @@ const timerSlice = createSlice({
     setTimer: (state, action: PayloadAction<number>) => {
       state.timeLeft = action.payload;
     },
-    setIsRunning: (state) => {
-      state.isRunning = !state.isRunning;
+    setIsRunning: (state, action: PayloadAction<boolean>) => {
+      state.isRunning = action.payload;
     },
-    setIsBreak: (state) => {
-      state.isBreak = !state.isBreak;
+    setIsBreak: (state, action: PayloadAction<boolean>) => {
+      state.isBreak = action.payload;
+    },
+    resetTimer: (state) => {
+      state.isBreak = initialState.isBreak;
+      state.isRunning = initialState.isRunning;
+      state.timeLeft = initialState.timeLeft;
     },
   },
 });
 
-export const { setIsBreak, setIsRunning, setTimer } = timerSlice.actions;
+export const { setIsBreak, setIsRunning, setTimer, resetTimer } =
+  timerSlice.actions;
 export const selectTimer = (state: RootState) => state.timer;
 const timerReducer = timerSlice.reducer;
 export default timerReducer;

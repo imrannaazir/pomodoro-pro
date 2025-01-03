@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { selectTimer } from "@/redux/features/timer-slice";
+import { useAppSelector } from "@/redux/hooks";
 import "@/styles/progress.css";
 import { ClassValue } from "clsx";
 import { FC, ReactNode } from "react";
@@ -19,6 +21,7 @@ const CircularProgress: FC<TCircularProgressProps> = ({
   progress,
   isPaused,
 }) => {
+  const { isBreak } = useAppSelector(selectTimer);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
@@ -31,7 +34,7 @@ const CircularProgress: FC<TCircularProgressProps> = ({
         height: size,
       }}
     >
-      <div className="inset-0 absolute  ">
+      <div className="inset-0 absolute  hidden">
         <div className="w-full   h-full inset-full flex items-center justify-center">
           <div
             className=" rounded-full animate-rotate circle-glow before:bg-primary before:shadow-secondary"
@@ -39,6 +42,10 @@ const CircularProgress: FC<TCircularProgressProps> = ({
               width: size - strokeWidth * 4,
               height: size - strokeWidth * 4,
               animationPlayState: isPaused ? "paused" : "running",
+              animation:
+                progress === 0
+                  ? "none"
+                  : "rotateCircles 60000ms linear infinite",
             }}
           ></div>
         </div>
@@ -51,7 +58,7 @@ const CircularProgress: FC<TCircularProgressProps> = ({
         }}
       >
         <circle
-          className="text-muted stroke-current"
+          className={cn("stroke-current", isBreak ? "text-card" : "text-muted")}
           strokeWidth={strokeWidth}
           fill="none"
           cx={size / 2}
@@ -59,7 +66,10 @@ const CircularProgress: FC<TCircularProgressProps> = ({
           r={radius}
         ></circle>
         <circle
-          className="text-primary stroke-current  transition-all duration-500 ease-in-out"
+          className={cn(
+            " stroke-current  transition-all duration-500 ease-in-out",
+            isBreak ? "text-secondary" : "text-primary"
+          )}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"

@@ -7,11 +7,6 @@
   }
 }
 
-.animate-rotate {
-  animation: rotateCircles 3s linear infinite;
-  animation-duration: 60s;
-}
-
 .circle-glow::before {
   content: "";
   position: absolute;
