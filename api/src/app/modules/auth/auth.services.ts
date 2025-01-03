@@ -1,23 +1,17 @@
+import { User } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import httpStatus from 'http-status';
 import config from '../../../config';
 import AppError from '../../../errors/appError';
 import { jwtHelpers } from '../../../helpers/jwtHelpers';
 import prisma from '../../../shared/prisma';
-import { TLogin, TRegister } from './auth.types';
+import { TLogin } from './auth.types';
 import { hashedPassword } from './auth.utils';
 
-const register = async (payload: TRegister) => {
+const register = async (payload: User) => {
   const isUserAlreadyExist = await prisma.user.findFirst({
     where: {
-      OR: [
-        {
-          email: payload.email,
-        },
-        {
-          phoneNumber: payload.phoneNumber,
-        },
-      ],
+      email: payload.email,
     },
   });
 
@@ -25,71 +19,31 @@ const register = async (payload: TRegister) => {
     throw new AppError(httpStatus.CONFLICT, 'User is already registered.');
   }
 
-  const hashPassword = await hashedPassword(payload.password);
+  const hashPassword = await hashedPassword(payload.password!);
 
-  const result = await prisma.$transaction(async transactionClient => {
-    const newUser = await transactionClient.user.create({
-      data: {
-        email: payload.email,
-        password: hashPassword,
-        phoneNumber: payload.phoneNumber,
-        role: payload.role,
-        status: 'ACTIVE',
-      },
-      select: {
-        id: true,
-        email: true,
-        phoneNumber: true,
-        role: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (payload.role === 'EMPLOYER') {
-      if (!payload.companyName) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'Company name is required.');
-      }
-
-      await transactionClient.company.create({
-        data: {
-          companyName: payload.companyName!,
-          userId: newUser?.id,
-        },
-      });
-    } else {
-      if (!payload.fullName) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'Fullname is required.');
-      }
-      await transactionClient.candidate.create({
-        data: {
-          fullName: payload.fullName!,
-          userId: newUser?.id,
-        },
-      });
-    }
-
-    return newUser;
-  });
-
-  const verifyToken = jwtHelpers.generateToken(
-    {
-      id: result.id,
-      email: result.email,
-      role: result.role,
+  const result = await prisma.user.create({
+    data: {
+      email: payload.email,
+      password: hashPassword,
+      role: payload.role,
+      name: payload.name,
     },
-    config.verify_token as string,
-    config.verify_expire_in as string,
-  );
-
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
   return result;
 };
 
 const login = async (payload: TLogin) => {
   const isUserAlreadyExist = await prisma.user.findFirst({
     where: {
-      OR: [{ email: payload.email }, { phoneNumber: payload.phoneNumber }],
+      email: payload.email,
     },
   });
 
@@ -104,17 +58,10 @@ const login = async (payload: TLogin) => {
     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Incorrect password');
   }
 
-  if (isUserAlreadyExist.status === 'BLOCKED') {
-    throw new AppError(httpStatus.FORBIDDEN, 'Your account is blocked.');
-  }
-
-  if (isUserAlreadyExist.status === 'PENDING') {
-    throw new AppError(httpStatus.FORBIDDEN, 'Your account is not verified.');
-  }
-
   const accessToken = jwtHelpers.generateToken(
     {
       id: isUserAlreadyExist.id,
+      name: isUserAlreadyExist?.name,
       email: isUserAlreadyExist.email,
       role: isUserAlreadyExist.role,
     },
@@ -124,6 +71,8 @@ const login = async (payload: TLogin) => {
   const refreshToken = jwtHelpers.generateToken(
     {
       id: isUserAlreadyExist.id,
+      name: isUserAlreadyExist?.name,
+
       email: isUserAlreadyExist.email,
       role: isUserAlreadyExist.role,
     },
@@ -133,7 +82,7 @@ const login = async (payload: TLogin) => {
   return {
     id: isUserAlreadyExist.id,
     email: isUserAlreadyExist.email,
-    phoneNumber: isUserAlreadyExist?.phoneNumber,
+    name: isUserAlreadyExist?.name,
     accessToken,
     refreshToken,
   };
@@ -157,15 +106,6 @@ const refreshToken = async (token: string) => {
   if (!userData) {
     throw new AppError(httpStatus.BAD_REQUEST, 'You are not authorized');
   }
-
-  if (userData.status === 'BLOCKED') {
-    throw new AppError(httpStatus.FORBIDDEN, 'Your account is blocked.');
-  }
-
-  if (userData.status === 'PENDING') {
-    throw new AppError(httpStatus.FORBIDDEN, 'Your account is not verified.');
-  }
-
   const accessToken = jwtHelpers.generateToken(
     {
       id: userData.id,
