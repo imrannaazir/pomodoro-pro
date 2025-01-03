@@ -20,6 +20,7 @@ import { Moon, Pause, Play, RotateCcw, Target } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "./button";
 import CircularProgress from "./circular-progress";
+import GradientText from "./gradient-text";
 
 const PomodoroTimer = () => {
   const defaultFocusTime = Number(process.env.NEXT_PUBLIC_FOCUS_TIME) * 60;
@@ -66,7 +67,9 @@ const PomodoroTimer = () => {
       <CardHeader>
         <div className="flex justify-between items-center ">
           <div className="space-y-1">
-            <CardTitle>Pomodoro timer</CardTitle>
+            <CardTitle>
+              <GradientText className="">Pomodoro timer</GradientText>
+            </CardTitle>
             <CardDescription>
               {isBreak ? "Break" : "Focus"} Time
             </CardDescription>
